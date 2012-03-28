@@ -1,0 +1,86 @@
+BLOCK SPAM IPS - v2.0			
+	Detects and prevents malicious login attempts on Windows computers by banning the IP subnets of offenders.
+
+OVERVIEW
+	block_spam_ips.exe scans and parses the Windows Security Event Log for IP addresses which show abusive behavior and add their entire /24 subnet (i.e., address range x.x.x.0 to x.x.x.254) to a blocking inbound firewall rule. Abusive behavior is defined as more than 10 failed login attempts from the same IP address over a 24 hour period.
+	
+	The application maintains a blacklist of suspect IP addresses in a local data store ("bannedips.dat"). Running the application with the "--install" parameter creates a custom rule in Windows Firewall that blocks the IPs which show up on this list, along with a daily scheduled task that runs the application to update the IP blacklist. Running the app with the "--remove" parameters will delete the firewall rule and the scheduled task for cleanup.
+	
+	This project and its binaries are free software (released under the Apache License v2.0) and can be used and modified without permission.
+	
+REQUIREMENTS
+	- Microsoft Log Parser 2.2 or above. (Download from: http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=24659)
+	
+	- .NET Client Framework 4.0 (Download from: http://www.microsoft.com/download/en/details.aspx?id=17851)
+	
+	- OPTIONAL: If you want to edit the IP blacklist stored in the local data file, you can use the SQLite3 Command Shell - "sqlite3.exe". (Download it from http://www.sqlite.org/sqlite-shell-win32-x86-3071000.zip.)
+	
+	
+HOW DOES IT WORK?
+	* Windows Firewall is the running service that blocks malicious inbound traffic. This application only picks out malicious IPs from the logged audit events and relays them to the  Windows Firewall.
+	* You need to have Microsoft Logparser installed, since it's used to comb through the Security Log and extract suspicious IPs based on the number of failed login attempts.
+	* The application maintains a list of these spam IPs in a small self-contained sqlite3 database.
+	* Installation sets up a Windows Firewall (incoming) rule to ban these IPs from connecting to the system.
+	* Installation sets up a Windows Task Scheduler job to run the application daily.
+	* The application is executed every day at the same time; it filters out the latest spammers from the event logs and updates the blacklist of IPs, first in the database, then in the incoming rule used by the firewall.
+	* The cycle starts again next day when the Windows Scheduler triggers the automated job.
+	
+	The code was written in C# using the .NET 4.0 framework (however should be easy to recompile in versions 2.0-3.5 if necessary). It should run successfully in Vista and later versions of Windows, but was mainly tested in Windows Server 2008 R2. The total runtime is between a couple of seconds to less than a minute, depending on the number of IPs spamming your system over a period.
+	
+SETUP & CONFIGURATION
+	These are the required steps to get the application working:
+	
+	1. Download and install Log Parser from the Microsoft site linked above.
+	2. Download and install .NET Framework 4.0 (if not already installed) from the Microsoft site linked above.
+	3. Create a local folder for the application. Download and unzip "block_spam_ips.zip" into this folder.
+	4. Open a command shell in the same folder and type:
+		block_spam_ips.exe --install
+	5. Open Windows Task Scheduler, either from the "Start Menu | Administrative Tools" folder, or by typing: "taskschd.msc /s" in the Search/Run box.
+	6. Confirm that a daily job called "Update Blacklisted IP Addresses" was created and is running successfuly.
+	
+	To uninstall the application:
+	   Open a command shell in the app folder and type:
+		block_spam_ips.exe --remove
+	   Then simply delete the application folder.
+	
+TROUBLESHOOTING
+	First, be advised that this software is provided "as is" and there are no warranties or support options. Having said that, if you can't get the application working as expected, try the following potential solutions:
+	- Make sure you have Administrator rights on the install target machine.
+	- Check "Administrative Tools | Services" to make sure both "Task Scheduler" and "Windows Firewall" have their status showing as "Started". If not, start them and set start-up type to "Automatic".
+	- Check to see if "Network Command Shell (netsh.exe)" is part of your Windows installation: Open a command prompt and type "netsh -?". If you get an error message instead of the available options for using netsh.exe, you may need to locate the app and copy it in your Windows\System32 folder.
+	- Scheduled job "Update Blacklisted IP Addresses" is created with the local SYSTEM account. If this account does not proper permissions to execute the job, start "Task Scheduler", right click on the job name and select "Properties", then click on the "Change User or Group..." button to use a different Windows account that has Administrative privileges on this machine.
+	
+	
+CUSTOMIZATIONS
+	Customizations to various settings are possible, but should not be attempted by casual users.
+
+	Easy change:
+	- You can modify the job start time using the Task Scheduler console from Windows.
+	- Alternatively, you can modify the "Update Blacklisted IP Addresses.xml" file using a text editor and change the start day/time within the "StartBoundary" tags. After changing any value in the XML file, type "block_spam_ips.exe --install" again to register the changes in the scheduled job.
+	
+	Moderate change:
+	- You can use Sqlite3.exe to modify the subnet mask ("/24") to set a more narrow range.
+	- You can also use Sqlite3.exe to query the IP tables and the last time the application was successfully run.
+	
+	Advanced change:
+	- You can update the solution files to change the filtering criteria for identifying spam IPs (default: more than 10 login failures from same IP within 24 hours)
+	- You can also update the SQL query to change the EventID or the Event Log (e.g., "Application" instead of "Security") and set up firewall rules based on other events, such as FTP login failures or attacks against your web pages.
+
+LICENSING
+	Copyright (c) 2012, Next Sprint LLC. http://www.nextsprint.com
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+		http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+	
+
+Thanks for using my application and I hope it does a great job for you.
+Email me at admin [_at_] nextsprint.com for suggestions or feedback.
