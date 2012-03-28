@@ -1,4 +1,4 @@
-BLOCK SPAM IPS - v2.0			
+BLOCK SPAM IPS - v2.0.1
 	Detects and prevents malicious login attempts on Windows computers by banning the IP subnets of offenders.
 
 OVERVIEW
@@ -49,6 +49,8 @@ TROUBLESHOOTING
 	- Check "Administrative Tools | Services" to make sure both "Task Scheduler" and "Windows Firewall" have their status showing as "Started". If not, start them and set start-up type to "Automatic".
 	- Check to see if "Network Command Shell (netsh.exe)" is part of your Windows installation: Open a command prompt and type "netsh -?". If you get an error message instead of the available options for using netsh.exe, you may need to locate the app and copy it in your Windows\System32 folder.
 	- Scheduled job "Update Blacklisted IP Addresses" is created with the local SYSTEM account. If this account does not proper permissions to execute the job, start "Task Scheduler", right click on the job name and select "Properties", then click on the "Change User or Group..." button to use a different Windows account that has Administrative privileges on this machine.
+	- Using the "--debug" parameter will generate a text file called "debuglog.txt" under the application folder. Refer to it for troubleshooting.
+	- Windows Task Scheduler can be quite finicky. If all else fails, remove the scheduler task to create a new one from scratch and configure it manually.
 	
 	
 CUSTOMIZATIONS

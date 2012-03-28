@@ -208,7 +208,7 @@ namespace block_spam_ips
                 }
 
                 taskxml = taskxml.Replace("%CURRENT_DIR%", currdir);
-                File.WriteAllText(currdir + "\\Update Blacklisted IP Addresses.xml", taskxml);
+                File.WriteAllText(currdir + "\\Update Blacklisted IP Addresses.xml", taskxml,Encoding.Unicode);
             }
             catch (Exception e)
             {
