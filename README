@@ -4,6 +4,8 @@ BLOCK SPAM IPS - v2.0.1
 OVERVIEW
 	block_spam_ips.exe scans and parses the Windows Security Event Log for IP addresses which show abusive behavior and add their entire /24 subnet (i.e., address range x.x.x.0 to x.x.x.254) to a blocking inbound firewall rule. Abusive behavior is defined as more than 10 failed login attempts from the same IP address over a 24 hour period.
 	
+	(UPDATE: I've stopped using this app completely. Frankly, moving the default port of RDP service to a randomly selected port higher than 10,000 seems to be doing as good, if not a better job at preventing abusive login attempts. However, if you have any constraints on making the port switch, or you're setting up a "honey pot" server, then you may find this app useful.)
+	
 	The application maintains a blacklist of suspect IP addresses in a local data store ("bannedips.dat"). Running the application with the "--install" parameter creates a custom rule in Windows Firewall that blocks the IPs which show up on this list, along with a daily scheduled task that runs the application to update the IP blacklist. Running the app with the "--remove" parameters will delete the firewall rule and the scheduled task for cleanup.
 	
 	This project and its binaries are free software (released under the Apache License v2.0) and can be used and modified without permission.
